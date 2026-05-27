@@ -34,6 +34,9 @@ coverage/
 vector_db_data/
 duckdb_data/
 
+# User config (gitignored; use config.example.yaml as template)
+config.yaml
+
 # OpenCode (dev tool config, not part of the runtime)
 .opencode/
 opencode.jsonc

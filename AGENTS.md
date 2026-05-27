@@ -71,15 +71,6 @@ prompts/              — version-controlled system prompts
 - State persisted via LangGraph's `SqliteSaver` / `PostgresSaver`
 - Human-in-the-loop interrupt nodes before expensive tournament rounds
 
-## Build Order (recommended in roadmap)
-
-1. Phase 2 (Model abstraction / LiteLLM) + Phase 5 (Generation)
-2. Phase 6 (Grounding / verification)
-3. Phase 8 (Debate / ranking)
-4. Then rest in dependency order
-
----
-
 ## System Instructions
 
 These rules govern all code written for OpenHypothesis:
@@ -87,7 +78,7 @@ These rules govern all code written for OpenHypothesis:
 1. **No boilerplate by hand.** Delegate Pydantic models, LangGraph state definitions, and LiteLLM router scaffolding to the agent — do not hand-write glue code.
 2. **Prompt-as-code.** Every agent system prompt lives in `prompts/` as a version-controlled file. Never inline prompts in Python strings across modules.
 3. **Validate before commit.** Run `ruff check . && mypy src/ && pytest` (in that order) before any commit or PR. Lint and typecheck must pass.
-4. **One agent pool at a time.** Build and test each pool in isolation before wiring it into the LangGraph DAG. Start with Generation (Phase 5), then Grounding (Phase 6), then Debate (Phase 8).
+4. **One agent pool at a time.** Build and test each pool in isolation before wiring it into the LangGraph DAG. Start with Generation (Phase 5), then Grounding (Phase 6), then Debate (Phase 7).
 5. **Async by default.** All I/O-bound agent calls, retrieval, and tool execution must use `asyncio`. The SDK entrypoint (`from openhypothesis import Discover`) must support `await`.
 6. **JSON in, JSON out.** Every agent output is a validated Pydantic model. Never return raw strings from agent nodes — parse into structured schemas at the boundary.
 7. **Quantized for local test.** Default to AWQ/GPTQ quantized models for CI and local dev. Reserve dense 400B+ models for final benchmark runs.
