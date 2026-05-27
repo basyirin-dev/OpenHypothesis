@@ -34,6 +34,10 @@ coverage/
 vector_db_data/
 duckdb_data/
 
+# OpenCode (dev tool config, not part of the runtime)
+.opencode/
+opencode.jsonc
+
 # OS
 .DS_Store
 Thumbs.db
