@@ -50,6 +50,13 @@ evals/
 prompts/              — version-controlled system prompts
 ```
 
+## Git Branch Convention
+
+- `main` — stable releases
+- `dev` — integration branch
+- `feature/<name>` — feature work (branched from `dev`)
+- `fix/<name>` — bugfixes (branched from `dev`)
+
 ## Dev Environment
 
 - **Container services:** Qdrant + DuckDB/Postgres + Redis (`docker-compose.yml`)
