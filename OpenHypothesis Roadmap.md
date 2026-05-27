@@ -1,74 +1,74 @@
-This is the definitive, engineering-grade roadmap to build **OpenHypothesis**, the open-source, multi-agent scientific discovery framework. It is structured into **13 comprehensive phases** (Phase 0 through Phase 12), breaking down the architecture into actionable tasks and subtasks. 
+This is the definitive, engineering-grade roadmap to build **OpenHypothesis**, the open-source, multi-agent scientific discovery framework. It is structured into **13 comprehensive phases** (Phase 0 through Phase 12), breaking down the architecture into actionable tasks and subtasks.
 
-This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-powered terminal IDE) for accelerated development, and is designed for a team of 2-4 core engineers or a highly motivated solo developer.
+**Status:** 28 May 2026 — Phases 0–3 ✅ complete, Phases 4–12 ⬜ planned through 29 June 2026.
 
 ---
 
-### **Phase 0: Bootstrap & OpenCode Environment Setup**
+### **Phase 0: Bootstrap & OpenCode Environment Setup** `[26–27 May]` ✅
 *Goal: Establish the AI-assisted development environment, configure OpenCode to understand the project context, and initialize the repository.*
 
 *   **Task 0.1: Install and Configure OpenCode**
-    *   *Subtask 0.1.1:* Install OpenCode CLI (`go install github.com/opencode-ai/opencode@latest` or via `npm`/`brew` depending on the specific fork/distribution).
-    *   *Subtask 0.1.2:* Configure local LLM provider for OpenCode (e.g., point to a local Ollama instance running `qwen2.5-coder:32b` or use a BYOK provider like Anthropic/OpenAI for the coding assistant).
-    *   *Subtask 0.1.3:* Create the `.opencode/` configuration directory and define the `system_prompt.md` to enforce project conventions (e.g., "Always use Pydantic V2, type hints, and `uv` for dependency management").
+    *   *Subtask 0.1.1:* Install OpenCode CLI.
+    *   *Subtask 0.1.2:* Configure local LLM provider for OpenCode.
+    *   *Subtask 0.1.3:* Create the `.opencode/` configuration directory and define the `system_prompt.md`.
 *   **Task 0.2: Repository Initialization**
     *   *Subtask 0.2.1:* Initialize Git repository and create the foundational branch structure (`main`, `dev`, `feature/*`).
-    *   *Subtask 0.2.2:* Generate the initial `README.md`, `LICENSE` (Apache 2.0 or MIT), and `.gitignore` using OpenCode.
-    *   *Subtask 0.2.3:* Initialize the Python project using `uv` (e.g., `uv init openhypothesis`, `uv add pydantic langgraph litellm`).
+    *   *Subtask 0.2.2:* Generate the initial `README.md`, `LICENSE` (Apache 2.0), and `.gitignore`.
+    *   *Subtask 0.2.3:* Initialize the Python project using `uv`.
 *   **Task 0.3: Context & Memory Seeding for OpenCode**
-    *   *Subtask 0.3.1:* Feed the "OpenHypothesis Architecture Proposal" (from the previous prompt) into OpenCode's context/memory so it understands the 5 Agent Pools and the 7-axis rubric.
-    *   *Subtask 0.3.2:* Define OpenCode custom commands (e.g., `/create-agent`, `/write-test`) in the config to standardize code generation.
+    *   *Subtask 0.3.1:* Feed the "OpenHypothesis Architecture Proposal" into OpenCode's context/memory.
+    *   *Subtask 0.3.2:* Define OpenCode custom commands in the config to standardize code generation.
 
 ---
 
-### **Phase 1: Core Infrastructure & Repo Skeleton**
+### **Phase 1: Core Infrastructure & Repo Skeleton** `[27 May]` ✅
 *Goal: Build the foundational software engineering plumbing, CI/CD, and containerization.*
 
 *   **Task 1.1: Monorepo Directory Structure**
-    *   *Subtask 1.1.1:* Scaffold directories: `src/openhypothesis/` (core logic), `agents/` (pool implementations), `tools/` (retrieval, parsing), `ui/` (interfaces), `tests/`, `evals/`.
+    *   *Subtask 1.1.1:* Scaffold directories: `src/openhypothesis/`, `agents/`, `tools/`, `ui/`, `tests/`, `evals/`.
     *   *Subtask 1.1.2:* Set up `pyproject.toml` with strict dependency groups (`dev`, `ui`, `eval`, `local-llm`).
 *   **Task 1.2: Containerization & Local Dev Environment**
-    *   *Subtask 1.2.1:* Write a comprehensive `docker-compose.yml` spinning up: Qdrant (Vector DB), DuckDB/Postgres (Relational/State), and Redis (Task Queue/Caching).
-    *   *Subtask 1.2.2:* Create a `Makefile` or `justfile` for common commands (`make up`, `make test`, `make ingest`).
+    *   *Subtask 1.2.1:* Write `docker-compose.yml` with Qdrant, Postgres, Redis.
+    *   *Subtask 1.2.2:* Create `Makefile` for common commands.
 *   **Task 1.3: CI/CD Pipeline (GitHub Actions)**
-    *   *Subtask 1.3.1:* Implement `ruff` for lightning-fast linting and formatting.
+    *   *Subtask 1.3.1:* Implement `ruff` for linting and formatting.
     *   *Subtask 1.3.2:* Implement `mypy` for strict static type checking.
-    *   *Subtask 1.3.3:* Set up `pytest` with coverage reporting, running automatically on PRs.
+    *   *Subtask 1.3.3:* Set up `pytest` with coverage reporting on PRs.
 
 ---
 
-### **Phase 2: Model Abstraction & BYOK/BYOM Layer**
+### **Phase 2: Model Abstraction & BYOK/BYOM Layer** `[27 May]` ✅
 *Goal: Allow users to Bring Your Own Key (API) or Bring Your Own Model (Local weights) seamlessly.*
 
 *   **Task 2.1: Unified Routing via LiteLLM**
-    *   *Subtask 2.1.1:* Integrate `litellm` to standardize calls across OpenAI, Anthropic, Gemini, Groq, and Together AI.
-    *   *Subtask 2.1.2:* Implement a `ModelRouter` class that handles fallbacks, rate-limit retries, and token-cost tracking.
+    *   *Subtask 2.1.1:* Integrate `litellm` for unified API across providers.
+    *   *Subtask 2.1.2:* Implement `ModelRouter` class with fallbacks, rate-limit retries, and token-cost tracking.
 *   **Task 2.2: Local Model Integration (BYOM)**
-    *   *Subtask 2.2.1:* Add native support for **Ollama** (for consumer hardware).
-    *   *Subtask 2.2.2:* Add native support for **vLLM** and **llama.cpp** (for high-throughput local inference).
-    *   *Subtask 2.2.3:* Implement an automated model-capability checker (e.g., verifying if the local model supports tool calling or long context).
+    *   *Subtask 2.2.1:* Add native support for **Ollama** (consumer hardware).
+    *   *Subtask 2.2.2:* Add native support for **vLLM** and **llama.cpp** (high-throughput local inference).
+    *   *Subtask 2.2.3:* Implement automated model-capability checker (tool-calling, context window support).
 *   **Task 2.3: Configuration & Secret Management**
-    *   *Subtask 2.3.1:* Build a YAML-based config system (`config.yaml`) for defining model profiles (e.g., `exploration_model: qwen2.5-72b`, `grounding_model: llama3.1-8b`).
-    *   *Subtask 2.3.2:* Integrate `pydantic-settings` to securely load API keys from `.env` or environment variables without hardcoding.
+    *   *Subtask 2.3.1:* Build YAML-based config system (`config.yaml`) for model profiles.
+    *   *Subtask 2.3.2:* Integrate `pydantic-settings` for `.env` / environment variable loading.
 
 ---
 
-### **Phase 3: State Management & Orchestration Engine**
-*Goal: Build the "Supervisor" that manages the multi-agent DAG (Directed Acyclic Graph) using LangGraph.*
+### **Phase 3: State Management & Orchestration Engine** `[28 May]` ✅
+*Goal: Build the "Supervisor" that manages the multi-agent DAG using LangGraph.*
 
 *   **Task 3.1: State Schema Definition**
-    *   *Subtask 3.1.1:* Define Pydantic models for `ResearchQuestion`, `Hypothesis`, `DebateTranscript`, `FeasibilityReport`, and `TournamentResult`.
-    *   *Subtask 3.1.2:* Create the master `OpenHypothesisState` TypedDict/Pydantic model that gets passed through the LangGraph nodes.
+    *   *Subtask 3.1.1:* Define Pydantic models for `ResearchQuestion`, `Hypothesis`, `DebateTranscript`, `FeasibilityReport`, `TournamentResult`.
+    *   *Subtask 3.1.2:* Create master `OpenHypothesisState` with Annotated reducers.
 *   **Task 3.2: LangGraph Topology Design**
-    *   *Subtask 3.2.1:* Define the core nodes: `generate`, `debate`, `ground`, `evaluate_feasibility`, `rank`.
-    *   *Subtask 3.2.2:* Implement conditional edges (e.g., if `epistemic_tag == "Speculative"` and `falsification_protocol == None`, route back to `generate`).
+    *   *Subtask 3.2.1:* Define core nodes: `generate`, `regenerate`, `filter`, `ground`, `graveyard`, `debate`, `feasibility`, `rank`.
+    *   *Subtask 3.2.2:* Implement conditional edges (finite-cycle regeneration for 🔴 speculatives without falsification protocols).
 *   **Task 3.3: Checkpointing & Human-in-the-Loop (HITL)**
-    *   *Subtask 3.3.1:* Integrate LangGraph's `SqliteSaver` or `PostgresSaver` for state persistence (allowing users to pause and resume multi-day runs).
-    *   *Subtask 3.3.2:* Implement HITL interrupt nodes where the system pauses and asks the user to approve the research direction before spending compute on the tournament.
+    *   *Subtask 3.3.1:* Integrate SqliteSaver (dev) / PostgresSaver (prod) for state persistence.
+    *   *Subtask 3.3.2:* Implement HITL interrupt node before tournament ranking.
 
 ---
 
-### **Phase 4: Knowledge Base & Retrieval Pipeline**
+### **Phase 4: Knowledge Base & Retrieval Pipeline** `[28–30 May]` ⬜
 *Goal: Build the hard-grounded retrieval engine with cryptographic citation locking.*
 
 *   **Task 4.1: Data Ingestion & Chunking**
@@ -84,7 +84,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 5: Exploration & Adversarial Pools (Generation)**
+### **Phase 5: Exploration & Adversarial Pools (Generation)** `[31 May – 2 Jun]` ⬜
 *Goal: Generate highly diverse, novel hypotheses and prevent echo chambers.*
 
 *   **Task 5.1: Divergent Generation Engine**
@@ -99,7 +99,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 6: Grounding & Verification Pool**
+### **Phase 6: Grounding & Verification Pool** `[3–5 Jun]` ⬜
 *Goal: Epistemic tagging, hallucination detection, and uncertainty quantification.*
 
 *   **Task 6.1: Tri-Layer Epistemic Tagger**
@@ -114,7 +114,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 7: Feasibility & "Graveyard" Pools**
+### **Phase 7: Feasibility & "Graveyard" Pools** `[6–8 Jun]` ⬜
 *Goal: Ground theoretical ideas in wet-lab reality and historical negative results.*
 
 *   **Task 7.1: Wet-Lab Feasibility Agent**
@@ -128,7 +128,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 8: Tournament & Meta-Reasoning Engine**
+### **Phase 8: Tournament & Meta-Reasoning Engine** `[9–10 Jun]` ⬜
 *Goal: Simulate scientific debates and rank hypotheses transparently.*
 
 *   **Task 8.1: Multi-Agent Debate Simulation**
@@ -142,7 +142,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 9: Interpretability, Audit & Transparency Layer**
+### **Phase 9: Interpretability, Audit & Transparency Layer** `[11–13 Jun]` ⬜
 *Goal: Ensure the system is a "glass box," not a black box.*
 
 *   **Task 9.1: Provenance & Audit Logging**
@@ -157,7 +157,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 10: User Interfaces (CLI, Web, SDK)**
+### **Phase 10: User Interfaces (CLI, Web, SDK)** `[14–18 Jun]` ⬜
 *Goal: Make the system accessible to bioinformaticians, PIs, and AI engineers.*
 
 *   **Task 10.1: Python SDK**
@@ -172,7 +172,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 11: Evaluation, Benchmarking & Red-Teaming**
+### **Phase 11: Evaluation, Benchmarking & Red-Teaming** `[19–25 Jun]` ⬜
 *Goal: Prove the system works, is safe, and doesn't hallucinate dangerously.*
 
 *   **Task 11.1: Automated Evaluation Harness**
@@ -186,7 +186,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ---
 
-### **Phase 12: Documentation, Community & v1.0 Launch**
+### **Phase 12: Documentation, Community & v1.0 Launch** `[26–29 Jun]` ⬜
 *Goal: Prepare the repository for public consumption, contributions, and viral open-source growth.*
 
 *   **Task 12.1: Comprehensive Documentation**
@@ -204,7 +204,7 @@ This roadmap assumes a modern Python stack, utilizing **OpenCode** (the AI-power
 
 ### **Project Management & Execution Advice**
 
-1.  **AI-Assisted Development:** Use OpenCode (Phase 0) relentlessly. Have it write the Pydantic models, the LangGraph state definitions, and the boilerplate for the LiteLLM router. *Do not write boilerplate by hand.*
-2.  **Iterative Checkpoints:** Do not build the whole graph before testing. Build Phase 2 (Models) and Phase 5 (Generation) first. Get a single agent generating hypotheses. Then add Phase 6 (Grounding). Then Phase 8 (Debate).
+1.  **AI-Assisted Development:** Use OpenCode relentlessly. Have it write the Pydantic models, LangGraph state definitions, and LiteLLM router scaffolding. *Do not write boilerplate by hand.*
+2.  **Iterative Checkpoints:** Build and test each agent pool in isolation before wiring into the full DAG. Start with Generation (Phase 5), then Grounding (Phase 6), then Debate (Phase 7).
 3.  **Prompt Version Control:** Treat agent system prompts like code. Store them in a dedicated `prompts/` directory, version them, and use a tool like Promptfoo to test them against edge cases.
 4.  **Compute Strategy:** For local testing (BYOM), use quantized models (e.g., Qwen2.5-72B-Instruct-AWQ or Llama-3.1-8B). Save the massive 400B+ parameter models for the final v1.0 benchmark runs.
