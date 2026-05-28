@@ -16,10 +16,13 @@ dependencies = [
     "pydantic-settings>=2.14.1",
     "pyyaml>=6.0.3",
     "langgraph-checkpoint-sqlite>=3.1.0",
+    "httpx>=0.28.0",
+    "numpy>=2.0.0",
 ]
 
 [project.scripts]
 openhypothesis = "openhypothesis.cli:app"
+openhypothesis-mcp = "openhypothesis.mcp:main"
 
 [build-system]
 requires = ["uv_build>=0.11.16,<0.12.0"]
@@ -51,6 +54,16 @@ local-llm = [
     "transformer-lens>=2.0.0",
     "lm-polygraph>=0.6.0",
 ]
+parsing = [
+    "marker>=0.4.0",
+    "nougat>=0.1.0",
+]
+local-embeddings = [
+    "sentence-transformers>=3.0.0",
+]
+mcp = [
+    "fastmcp>=2.0.0",
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -68,6 +81,10 @@ python_version = "3.12"
 warn_unused_configs = true
 ignore_missing_imports = true
 exclude = ["tests/", "evals/"]
+
+[[tool.mypy.overrides]]
+module = "openhypothesis.tools.ingest"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

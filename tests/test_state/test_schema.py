@@ -1,3 +1,5 @@
+"""Tests for state schema models — defaults, construction, and field types."""
+
 from openhypothesis.state.schema import (
     AxisScore,
     Citation,

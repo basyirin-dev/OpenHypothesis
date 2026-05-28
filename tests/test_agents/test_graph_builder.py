@@ -1,3 +1,5 @@
+"""Tests for the LangGraph DAG builder — construction, compilation, routing."""
+
 from langgraph.graph import StateGraph
 
 from openhypothesis.agents.graph_builder import build_graph, compile_graph, route_after_graveyard

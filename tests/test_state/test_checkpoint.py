@@ -1,3 +1,5 @@
+"""Tests for the checkpointer factory — memory, SQLite, and env-based selection."""
+
 import os
 
 from langgraph.checkpoint.memory import MemorySaver

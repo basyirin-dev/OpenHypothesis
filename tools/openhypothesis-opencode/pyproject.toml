@@ -1,0 +1,48 @@
+[project]
+name = "openhypothesis-opencode"
+version = "0.1.0"
+description = "OpenCode integration for OpenHypothesis — agents, commands, MCP server, skills, and lifecycle hooks."
+readme = "README.md"
+authors = [
+    { name = "basyirin", email = "amsyar.basy@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.25.0",
+]
+
+[project.optional-dependencies]
+opencode = []
+dev = [
+    "pytest>=9.0.0",
+    "ruff>=0.15.0",
+    "mypy>=2.1.0",
+]
+
+[project.scripts]
+openhypothesis-opencode = "openhypothesis_opencode.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "C4"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["tests/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

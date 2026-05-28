@@ -33,3 +33,20 @@ router:
   request_timeout: 120
   num_retries_on_timeout: 2
   fallback_strategy: cascade
+
+embedding:
+  model: "BAAI/bge-m3"
+  provider: "sentence-transformers"
+  dimension: 1024
+  device: "cpu"
+  batch_size: 32
+
+qdrant:
+  host: "localhost"
+  port: 6333
+  grpc_port: 6334
+  collection: "scientific_papers"
+  hnsw:
+    m: 16
+    ef_construct: 200
+    ef_search: 256

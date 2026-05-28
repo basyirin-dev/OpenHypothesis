@@ -1,3 +1,5 @@
+"""Tests for config settings — defaults, env loading, API key resolution."""
+
 from openhypothesis.config.schema import AppConfig, ModelProfile
 from openhypothesis.config.settings import Settings
 

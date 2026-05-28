@@ -1,0 +1,58 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "name": "OpenHypothesis",
+  "default_agent": "scientific-researcher",
+  "instructions": ["AGENTS.md"],
+  "agent": {
+    "scientific-researcher": {
+      "description": "Multi-role scientific discovery agent for hypothesis generation, literature grounding, and feasibility analysis.",
+      "mode": "primary",
+      "temperature": 0.7,
+      "permission": {
+        "read": "allow",
+        "bash": "ask",
+        "edit": "deny",
+        "websearch": "allow",
+        "webfetch": "allow"
+      }
+    }
+  },
+  "mcp": {
+    "openhypothesis-mcp": {
+      "type": "local",
+      "command": ["uv", "run", "openhypothesis-mcp"],
+      "enabled": true
+    },
+    "openhypothesis-mcp-restricted": {
+      "type": "local",
+      "command": ["uv", "run", "openhypothesis-mcp", "--allow-tools", "search_papers,search_negative_results,check_citation"],
+      "enabled": true
+    }
+  },
+  "command": {
+    "discover": {
+      "description": "Execute the full discovery pipeline on a research question.",
+      "prompt": "You are executing the /discover command to run the OpenHypothesis discovery pipeline.\n\n1. Accept the user's research question and optional domain.\n2. Escape single quotes in the question.\n3. Run:\n   uv run python -c \"\nimport asyncio, json\nfrom openhypothesis import Discover\n\nasync def run():\n    result = await Discover(question='<question>', domain='<domain>').execute()\n    print(result.model_dump_json(indent=2))\n\nasyncio.run(run())\n\"\n4. Parse the returned JSON and present to the user:\n   - Research question and domain\n   - Number of hypotheses generated\n   - Top 3 ranked hypotheses (from tournament_results) with their weighted_score\n   - Epistemic tag breakdown (confirmed/plausible/speculative/contradicted counts)\n   - Feasibility go/no-go count\n   - Total cost from total_cost_usd\n   - Stage the pipeline finished at"
+    },
+    "ground": {
+      "description": "Ground a single hypothesis against the local Qdrant corpus with epistemic tagging.",
+      "prompt": "You are executing the /ground command to ground a hypothesis against the Qdrant corpus.\n\n1. Accept the hypothesis string from the user.\n2. Escape single quotes.\n3. Run:\n   uv run python -c \"\nimport asyncio, json\nfrom openhypothesis.config.settings import Settings\nfrom openhypothesis.config.schema import AppConfig\nfrom openhypothesis.tools.embedder import create_embedder\nfrom openhypothesis.tools.retriever import open_store\nfrom openhypothesis.tools.citation_hasher import CitationHasher\n\nasync def run():\n    settings = Settings()\n    config = settings.app_config\n    embedder = create_embedder(config.embedding)\n    vector = await embedder.embed('<hypothesis>')\n    async with open_store(config.qdrant) as store:\n        results = await store.search(vector, top_k=10)\n    output = []\n    for r in results:\n        p = r.payload\n        h = CitationHasher.hash(doi=p.get('doi', ''), chunk_text=p.get('chunk_text', ''))\n        output.append({'score': r.score, 'doi': p.get('doi'), 'title': p.get('title'), 'chunk_text': p.get('chunk_text'), 'citation_hash': h})\n    print(json.dumps(output, indent=2))\n\nasyncio.run(run())\n\"\n4. Tag each claim based on results:\n   - Green: >=2 citations with score > 0.9\n   - Yellow: >=1 citation with score > 0.7\n   - Red: no citations above 0.7\n5. Display citations with scores and citation hash verification status."
+    },
+    "feasibility": {
+      "description": "Run wet-lab feasibility analysis against a proposed protocol or hypothesis.",
+      "prompt": "You are executing the /feasibility command to assess wet-lab feasibility.\n\n1. Accept a protocol description or a hypothesis ID from a prior /discover run.\n2. If a hypothesis ID is given, look up the hypothesis from the conversation history.\n3. Use your reasoning to produce a structured FeasibilityReport covering:\n   - Required reagents with estimated quantities and supplier pricing\n   - Required equipment\n   - Biosafety level (BSL-1 to BSL-4) with rationale\n   - Estimated timeline in weeks (optimistic/pessimistic)\n   - Estimated cost in USD\n   - Known failure modes from literature\n   - Go/no-go recommendation\n4. Format the output as a readable report with sections and finally offer the JSON summary."
+    },
+    "graveyard": {
+      "description": "Search the negative-results corpus for prior failed attempts on a given target or mechanism.",
+      "prompt": "You are executing the /graveyard command to search the negative-results corpus.\n\n1. Accept the target or mechanism (e.g. 'KRAS G12C inhibition').\n2. First try searching the Qdrant 'negative_results' collection:\n   uv run python -c \"\nimport asyncio, json\nfrom openhypothesis.config.settings import Settings\nfrom openhypothesis.tools.embedder import create_embedder\nfrom openhypothesis.tools.retriever import open_store\n\nasync def run():\n    settings = Settings()\n    config = settings.app_config\n    embedder = create_embedder(config.embedding)\n    vector = await embedder.embed('<target>')\n    qdrant_config = config.qdrant.model_copy(update={'collection': 'negative_results'})\n    async with open_store(qdrant_config) as store:\n        if await store.collection_exists():\n            results = await store.search(vector, top_k=5)\n            print(json.dumps([{'score': r.score, 'payload': r.payload} for r in results], indent=2))\n        else:\n            print('[]')\n\nasyncio.run(run())\n\"\n3. If no Qdrant results, also check conversation history for previously discarded hypotheses.\n4. Display what was attempted, why it failed, and key references.\n5. Include a 'What Has Already Failed' appendix."
+    },
+    "audit": {
+      "description": "Export a full provenance audit trail for a previous discovery session.",
+      "prompt": "You are executing the /audit command to export a provenance audit trail.\n\n1. Accept an optional thread_id. If omitted, list recent checkpoints first.\n2. Run to load state:\n   uv run python -c \"\nimport asyncio, json\nfrom openhypothesis.state.checkpoint import create_checkpointer\n\nasync def run():\n    checkpointer = create_checkpointer()\n    if hasattr(checkpointer, 'aget'):\n        state = await checkpointer.aget('<thread_id>')\n        print(json.dumps(state, indent=2, default=str))\n    else:\n        state = checkpointer.get('<thread_id>')\n        print(json.dumps(state, indent=2, default=str))\n\nasyncio.run(run())\n\"\n3. Parse the state and format a markdown report with:\n   - Research question and timestamp\n   - All hypotheses with epistemic tags, confidence, and generated_by\n   - Supporting and contradicting citations\n   - Debate transcripts\n   - Feasibility reports\n   - Tournament rankings\n   - Total cost and stage timeline\n4. Offer to export as JSON with --json flag."
+    },
+    "dashboard": {
+      "description": "Launch the Gradio web UI and open it in the browser.",
+      "prompt": "You are executing the /dashboard command to launch the Gradio web UI.\n\n1. Run the Gradio app in the background:\n   uv run python -m openhypothesis.ui.web.app &\n2. Wait a few seconds for the server to start.\n3. Detect the local URL by checking stdout or defaulting to http://127.0.0.1:7860.\n4. Open the browser:\n   - Linux: xdg-open <url>\n   - macOS: open <url>\n   - Fallback: python -c \"import webbrowser; webbrowser.open('<url>')\"\n5. Report the URL back to the user.\n\nIf the Gradio module is not yet implemented, install missing dependencies with:\n   uv sync --group ui\nAnd retry."
+    }
+  }
+}

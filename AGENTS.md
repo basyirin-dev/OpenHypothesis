@@ -71,6 +71,15 @@ prompts/              — version-controlled system prompts
 - State persisted via LangGraph's `SqliteSaver` / `PostgresSaver`
 - Human-in-the-loop interrupt nodes before expensive tournament rounds
 
+## Code Quality Gate (pre-testing & debugging)
+
+Before any testing or debugging phase begins, all code must satisfy these four characteristics:
+
+1. **Straightforward** — No overly complex or confusing logic. If a function does too much, split it. If an approach is non-obvious, explain why it was chosen.
+2. **Well-documented** — Every public class, method, and function has a docstring covering purpose, assumptions, and limitations. Inline comments explain non-obvious values (magic numbers, timeout choices, hardcoded lists).
+3. **Modular** — Components are self-contained with clear interfaces. Changing one module should not require changes in unrelated modules. Node functions return `dict[str, Any]` to decouple producers from consumers.
+4. **Graceful error handling** — External I/O (LLM calls, DB connections, file reads) is wrapped with specific exception handling. User-facing entry points catch and format errors instead of letting raw tracebacks propagate. Pydantic validation handles input shaping automatically.
+
 ## System Instructions
 
 These rules govern all code written for OpenHypothesis:

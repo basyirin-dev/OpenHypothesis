@@ -1,3 +1,5 @@
+"""Tests for the model router and capability checker."""
+
 import pytest
 
 from openhypothesis.tools.model_router import CostRecord, GenerationResponse, ModelRouter
